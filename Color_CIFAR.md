@@ -222,3 +222,5 @@ These are the results that had the best scores without showing signs of overfitt
 | -------- | -------- | -------- | -------- | -------- | -------- |
 | **8** | **0.0302** | **0.0309** | **23.0104** | **0.9389** | **0.1946** |
 | **9** | **0.0301** | **0.0308** | **23.0207** | **0.9392** | **0.1940** |
+
+Best model weights are [here](https://huggingface.co/datasets/NoahSizemore/Colorization_Best_Weights/blob/main/unet_model_final.pth)
