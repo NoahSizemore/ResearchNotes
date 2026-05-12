@@ -1,11 +1,11 @@
-# EXP-003: CIFAR-10 Gaussian UNET Implementing β-NLL
+# EXP-003A: CIFAR-10 Gaussian UNET Implementing β-NLL
 
 **Date:** 2026-05-11
 **Author:** Noah Sizemore
-**Status:** Complete
+**Status:** In Progress
 
 ## Goal
-The goal for this experiment is to adapt previous experiment to use Gaussian UNET. In this test, the Gaussian UNET implements β-NLL (β = 0.5) training objective based on results from [other literature.]() Results from this experiement are expanding upon the [deterministic UNET]() (in the sense that the UNET is being adapted) and [deep ensemble]() (the experiment will report on uncertainty metrics AUSE, ENCE, and, now, NLL) experiments.
+The goal for this experiment is to adapt previous experiment to use Gaussian UNET. In this test, the Gaussian UNET implements β-NLL (β = 0.5) training objective based on results from [other literature.](https://iclr.cc/virtual/2022/poster/6755) Results from this experiement are expanding upon the [deterministic UNET](https://github.com/FOURM-LAB/CrispSynth/blob/main/notes/experiments/exp001_deterministic_unet_colorization.md) (in the sense that the UNET is being adapted) and [deep ensemble](https://github.com/FOURM-LAB/CrispSynth/blob/main/notes/experiments/exp002_deep_ensemble_colorization.md) (the experiment will report on uncertainty metrics AUSE, ENCE, and, now, NLL) experiments.
 
 ## Setup
 - **Model:** Four-layer deep UNET implementing batch normalization; [compute_uncertainty.py](https://github.com/NoahSizemore/ResearchProjects/blob/main/compute_uncertainty.py) for computing AUSE and ECE (for my testing, specifically ENCE).
@@ -16,29 +16,29 @@ The goal for this experiment is to adapt previous experiment to use Gaussian UNE
 - **GPU:** A30
 - **Training time:** UNET training: 3 minutes; Total time to determine uncertainty: 1 minute
 - **Commit:** `ab18c68993efcd8dd914fd6e67e2ec2c15f37750`
-- **W&B run:** [link if applicable]
+- **W&B run:** [HuggingFace](https://huggingface.co/datasets/NoahSizemore/Gaussian_UNET/tree/main)
 
 ## Results
 
-| Seed | TRAIN &darr; | TEST &darr; | PSNR &uarr; | SSIM &uarr; | LPIPS &darr; | Alea. AUSE &darr; | Epis. AUSE &darr; | Tot. AUSE &darr; | Alea. ENCE &darr; | Epis. ENCE &darr; | Tot. ENCE &darr; |
-|------|--------------|-------------|-------------|-------------|--------------|-------------------|-------------------|------------------|-------------------|-------------------|------------------|
-| 42   | -0.1212      | -0.1198     | 22.8486     | 0.9358      | 0.2000       | 0.3250            | 0.8354            | 0.3250           | 0.0751            | 4704976.0445      | 0.0751           |
+| Seed | TRAIN &darr; | TEST &darr; | PSNR &uarr; | SSIM &uarr; | LPIPS &darr; | Alea. AUSE &darr; | Epis. AUSE &darr; | Tot. AUSE &darr; | Alea. ENCE &darr; | Epis. ENCE &darr; | Tot. ENCE &darr; | L1 Mu       |
+|------|--------------|-------------|-------------|-------------|--------------|-------------------|-------------------|------------------|-------------------|-------------------|------------------|-------------|
+| 42   | -0.1212      | -0.1198     | 22.8486     | 0.9358      | 0.2000       | 0.3250            | 0.8354            | 0.3250           | 0.0751            | 4704976.0445      | 0.0751           | 0.0320      |
 
-See [here]() for the `.json` file with results from uncertainty testing.
+See [here](https://github.com/FOURM-LAB/CrispSynth/blob/main/notes/experiments/images/gaussian_cifar/gnll_ause_results.json) for the `.json` file with results from uncertainty testing.
 
 ## Key Figures
 
 ### Reliability:
 
-![Description](figures/expNNN_figure_name.png)
-![Description](figures/expNNN_figure_name.png)
-![Description](figures/expNNN_figure_name.png)
+![Aleatoric reliability figure](https://github.com/FOURM-LAB/CrispSynth/blob/main/notes/experiments/images/gaussian_cifar/gnll_reliability_aleatoric.png)
+![Epistemic reliability figure](https://github.com/FOURM-LAB/CrispSynth/blob/main/notes/experiments/images/gaussian_cifar/gnll_reliability_epistemic.png)
+![Total reliability figure](https://github.com/FOURM-LAB/CrispSynth/blob/main/notes/experiments/images/gaussian_cifar/gnll_reliability_total.png)
 
 ### Sparsification: 
 
-![Description](figures/expNNN_figure_name.png)
-![Description](figures/expNNN_figure_name.png)
-![Description](figures/expNNN_figure_name.png)
+![Aleatoric sparsification figure](https://github.com/FOURM-LAB/CrispSynth/blob/main/notes/experiments/images/gaussian_cifar/gnll_sparsification_aleatoric.png)
+![Epistemic sparsification figure](https://github.com/FOURM-LAB/CrispSynth/blob/main/notes/experiments/images/gaussian_cifar/gnll_sparsification_epistemic.png)
+![Total sparsification figure](https://github.com/FOURM-LAB/CrispSynth/blob/main/notes/experiments/images/gaussian_cifar/gnll_sparsification_total.png)
 
 
 ## Observations
@@ -55,6 +55,8 @@ For ENCE, every bin has a predicted variance of essentially zero (numerical nois
 
 The total variance value is to be expected, as matching the aleatoric value is the anticipated result. Since $\text{total} = \text{aleatoric} + \text{epistemic}$, and the epistemic variance is exactly zero, the total is exactly equal to the aleatoric variance.
 
+L1 Mu is the MAE loss which is a normal value which is to be expected from the model.
+
 ## Next Steps
 
 The new model introduces the possibility of discovering better hyperparameters, meaning additional testing may be required to achieve optimal results. Future testing could include the following adjustments:
@@ -62,3 +64,78 @@ The new model introduces the possibility of discovering better hyperparameters, 
 *   Training for more epochs.
 *   Experimenting with different $\beta$-NLL values.
 *   Testing group normalization.
+*   Potentially adjust L1 Mu to the standard formula for more accurate results $0.5 * (log(2π) + logvar + (target - mu)² / var)$
+
+
+# EXP-003B: CIFAR-10 Gaussian UNET Hyperparameter Search
+
+**Date:** 2026-05-12
+**Author:** Noah Sizemore
+**Status:** Complete
+
+## Goal 
+The goal of this experiment is to expand upon the previous experiment prior EXP-003A, and search for potentially better preforming hyperparameters.
+
+## Setup pt.1
+- **Model:** Four-layer deep UNET implementing batch normalization; [compute_uncertainty.py](https://github.com/NoahSizemore/ResearchProjects/blob/main/compute_uncertainty.py) for computing AUSE and ECE (for my testing, specifically ENCE).
+- **Dataset:** CIFAR-10
+- **Method:** Gaussian UNET with β-NLL
+- **Key hyperparameters:** LR = 1e-4; Batch size = 128; epochs = 9; seeds = 42
+- **Loss:** MAE, PSNR, SSIM, LPIPS
+- **GPU:** A30
+- **Training time:** UNET training: 3 minutes; Total time to determine uncertainty: 1 minute
+- **Commit:** `ab18c68993efcd8dd914fd6e67e2ec2c15f37750`
+
+## Results pt.1
+
+### Adjusting LR from 2e-4 to 1e-4
+
+| Seed | TRAIN &darr; | TEST &darr; | PSNR &uarr; | SSIM &uarr; | LPIPS &darr; | Alea. AUSE &darr; | Epis. AUSE &darr; | Tot. AUSE &darr; | Alea. ENCE &darr; | Epis. ENCE &darr; | Tot. ENCE &darr; | L1 Mu       |
+|------|--------------|-------------|-------------|-------------|--------------|-------------------|-------------------|------------------|-------------------|-------------------|------------------|-------------|
+| 42   | -0.1911      | -0.1896     | 22.6139     | 0.9309      | 0.2132       | 0.4825            | 0.8403            | 0.4825           | 0.4270            | 4845239.8926      | 0.4270           | 0.0329      |
+
+
+## Observations pt.1
+The new learning rate did not improve the models performance across any metric. All of the following were, even minimally worse than EXP-003A. Moving forward, not adjusting the LR ro 1-e4 was not productive.
+
+## Next Steps pt.1
+
+he new model introduces the possibility of discovering better hyperparameters, meaning additional testing may be required to achieve optimal results. Future testing could include the following adjustments:
+*   Training for more epochs.
+*   Experimenting with different $\beta$-NLL values.
+*   Testing group normalization.
+*   Potentially adjust L1 Mu to the standard formula for more accurate results $0.5 * (log(2π) + logvar + (target - mu)² / var)$
+
+## Setup pt.2
+- **Model:** Four-layer deep UNET implementing batch normalization; [compute_uncertainty.py](https://github.com/NoahSizemore/ResearchProjects/blob/main/compute_uncertainty.py) for computing AUSE and ECE (for my testing, specifically ENCE).
+- **Dataset:** CIFAR-10
+- **Method:** Gaussian UNET with β-NLL
+- **Key hyperparameters:** LR = 2e-4; Batch size = 128; epochs = 20; seeds = 42
+- **Loss:** MAE, PSNR, SSIM, LPIPS
+- **GPU:** A30
+- **Training time:** UNET training: 3 minutes; Total time to determine uncertainty: 1 minute
+- **Commit:** `ab18c68993efcd8dd914fd6e67e2ec2c15f37750`
+
+## Results pt.2
+
+### Training for 20 epochs
+
+| EPOCH| TRAIN &darr; | TEST &darr; | PSNR &uarr; | SSIM &uarr; | LPIPS &darr; | Alea. AUSE &darr; | Epis. AUSE &darr; | Tot. AUSE &darr; | Alea. ENCE &darr; | Epis. ENCE &darr; | Tot. ENCE &darr; | L1 Mu       |
+|------|--------------|-------------|-------------|-------------|--------------|-------------------|-------------------|------------------|-------------------|-------------------|------------------|-------------|
+| 18   | -0.1113      | -0.1045     | 22.9930     | 0.9374      |  0.1909      | NULL              | NULL              | NULL             | NULL              | NULL              | NULL             | 0.0314      |
+| 20   | -0.1104      | -0.1026     | 22.9505     | 0.9371      |  0.1916      | 0.3493            | 0.8479            | 0.3493           | 0.1573            | 4661291.5396      | 0.1573           | 0.0315      |
+
+
+## Observations pt.2
+Testing over more epochs proved to be valuable. Epoch 18 proved to be better overall compared to previous testing. Epochs above 18 showed minor overfitting (e.g., the training/validation gap was above 5%). Moving forward, the new hyperparameters for the model will include training for 18 epochs rather than 9.
+
+Interstingly, the models preformance increased when double the previous epoch. New question being asked: Would training for 27, 36, or other epochs in increments of nine improve the model?
+
+ 
+## Next Steps pt.2
+
+he new model introduces the possibility of discovering better hyperparameters, meaning additional testing may be required to achieve optimal results. Future testing could include the following adjustments:
+*   Experimenting with epochs 27 and 36
+*   Experimenting with different $\beta$-NLL values.
+*   Testing group normalization.
+*   Potentially adjust L1 Mu to the standard formula for more accurate results $0.5 * (log(2π) + logvar + (target - mu)² / var)$
